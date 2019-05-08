@@ -6,7 +6,7 @@
 
 ## Description
 
-Enabled process wide health endpoint. When CoreDNS is up and running this returns a 200 OK http
+Enabled process wide health endpoint. When CoreDNS is up and running this returns a 200 OK HTTP
 status code. The health is exported, by default, on port 8080/health .
 
 ## Syntax
@@ -76,10 +76,3 @@ Set a lameduck duration of 1 second:
     }
 }
 ~~~
-
-## Bugs
-
-When reloading, the health handler is stopped before the new server instance is started. If that
-new server fails to start, then the initial server instance is still available and DNS queries still
-served, but health handler stays down. Health will not reply HTTP request until a successful reload
-or a complete restart of CoreDNS.
