@@ -135,6 +135,11 @@ func ParseForwardStanza(c *caddyfile.Dispenser) (*Forward, error) {
 
 func parseBlock(c *caddyfile.Dispenser, f *Forward) error {
 	switch c.Val() {
+	case "xpf_enabled":
+		if c.NextArg() {
+			return c.ArgErr()
+		}
+		f.opts.xpfEnabled = true
 	case "except":
 		ignore := c.RemainingArgs()
 		if len(ignore) == 0 {

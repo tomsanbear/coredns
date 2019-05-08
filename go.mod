@@ -75,4 +75,7 @@ require (
 	sigs.k8s.io/yaml v1.1.0 // indirect
 )
 
-replace github.com/DataDog/dd-trace-go v0.6.1 => github.com/datadog/dd-trace-go v0.6.1
+replace (
+	github.com/DataDog/dd-trace-go v0.6.1 => github.com/datadog/dd-trace-go v0.6.1
+	github.com/miekg/dns v1.1.8 => github.com/tomsanbear/dns v1.1.10-0.20190508012823-5d57079ccbbe
+)

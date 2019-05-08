@@ -102,6 +102,13 @@ func (f *Forward) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg
 			ctx = ot.ContextWithSpan(ctx, child)
 		}
 
+		if f.opts.xpfEnabled {
+			err := HandleXPF(&state)
+			if err != nil {
+				clog.Infof("failed to append the XPF record to the Question: %v", err)
+			}
+		}
+
 		var (
 			ret *dns.Msg
 			err error
@@ -213,8 +220,9 @@ const (
 
 // options holds various options that can be set.
 type options struct {
-	forceTCP  bool
-	preferUDP bool
+	forceTCP   bool
+	preferUDP  bool
+	xpfEnabled bool
 }
 
 const defaultTimeout = 5 * time.Second
