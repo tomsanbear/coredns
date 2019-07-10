@@ -103,12 +103,11 @@ func (f *Forward) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg
 		}
 
 		var (
-			ret *dns.Msg
 			err error
 		)
 		opts := f.opts
 		for {
-			ret, err = proxy.Connect(ctx, state, opts)
+			state.Resp, err = proxy.Connect(ctx, state, opts)
 			if err == nil {
 				break
 			}
@@ -116,7 +115,7 @@ func (f *Forward) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg
 				continue
 			}
 			// Retry with TCP if truncated and prefer_udp configured.
-			if ret != nil && ret.Truncated && !opts.forceTCP && f.opts.preferUDP {
+			if state.Resp != nil && state.Resp.Truncated && !opts.forceTCP && f.opts.preferUDP {
 				opts.forceTCP = true
 				continue
 			}
@@ -126,7 +125,7 @@ func (f *Forward) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg
 		if child != nil {
 			child.Finish()
 		}
-		taperr := toDnstap(ctx, proxy.addr, f, state, ret, start)
+		taperr := toDnstap(ctx, proxy.addr, f, state, state.Resp, start)
 
 		upstreamErr = err
 
@@ -143,8 +142,8 @@ func (f *Forward) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg
 		}
 
 		// Check if the reply is correct; if not return FormErr.
-		if !state.Match(ret) {
-			debug.Hexdumpf(ret, "Wrong reply for id: %d, %s %d", ret.Id, state.QName(), state.QType())
+		if !state.Match(state.Resp) {
+			debug.Hexdumpf(state.Resp, "Wrong reply for id: %d, %s %d", state.Resp.Id, state.QName(), state.QType())
 
 			formerr := new(dns.Msg)
 			formerr.SetRcode(state.Req, dns.RcodeFormatError)
@@ -152,7 +151,7 @@ func (f *Forward) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg
 			return 0, taperr
 		}
 
-		w.WriteMsg(ret)
+		w.WriteMsg(state.Resp)
 		return 0, taperr
 	}
 
